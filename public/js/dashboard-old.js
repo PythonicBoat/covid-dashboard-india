@@ -9,23 +9,40 @@ class BackendDashboard {
         this.VISITOR_COUNT_KEY = 'covidDashboardVisitors';
         this.BASE_VISITOR_COUNT = 1; // Starting count
         
-        // API Configuration - GitHub-only approach
+        // API Configuration - auto-detect environment
         this.API_BASE_URL = this.getApiBaseUrl();
         
         this.init();
     }
 
     getApiBaseUrl() {
-        // Check if we're in development or production
+        // Check if we're in production (Vercel) or development
         const hostname = window.location.hostname;
         
-        if (hostname === 'localhost' || hostname === '127.0.0.1') {
-            // Development - use local Spring Boot backend
+        if (hostname.includes('vercel.app') || hostname.includes('netlify.app')) {
+            // Production - try multiple backend options
+            return this.getProductionApiUrl();
+        } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            // Development
             return 'http://localhost:8080';
         } else {
-            // Production - use GitHub Pages static API only
-            return 'https://pythonicboat.github.io/covid-dashboard-india';
+            // Default fallback
+            return window.location.origin;
         }
+    }
+
+    getProductionApiUrl() {
+        // Multiple backend options in order of preference
+        const backendOptions = [
+            'https://covid-dashboard-india-production.railway.app',  // Railway
+            'https://covid-dashboard-pythonicboat.onrender.com',     // Render
+            'https://pythonicboat.github.io/covid-dashboard-india', // GitHub Pages Static API
+            'https://covid-dashboard-backend.herokuapp.com'         // Heroku (if configured)
+        ];
+        
+        // For now, return the first option
+        // You can implement fallback logic here if needed
+        return backendOptions[0];
     }
 
     init() {
@@ -60,17 +77,21 @@ class BackendDashboard {
             let response;
             let data;
             
-            if (this.API_BASE_URL.includes('localhost')) {
-                // Development - use Spring Boot backend
+            // Try primary backend first
+            try {
                 response = await fetch(`${this.API_BASE_URL}/api/metrics`);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 data = await response.json();
-            } else {
-                // Production - use GitHub Pages static API
-                console.log('🌐 Using GitHub Pages static API...');
-                response = await fetch(`${this.API_BASE_URL}/metrics.json`);
-                if (!response.ok) throw new Error(`GitHub API HTTP ${response.status}`);
+            } catch (primaryError) {
+                console.warn('⚠️ Primary backend failed, trying GitHub Pages static API...');
+                
+                // Fallback to GitHub Pages static API
+                const staticApiUrl = 'https://pythonicboat.github.io/covid-dashboard-india/metrics.json';
+                response = await fetch(staticApiUrl);
+                if (!response.ok) throw new Error(`Static API HTTP ${response.status}`);
                 data = await response.json();
+                
+                console.log('✅ Using static API fallback');
             }
             
             if (data.status === 'success') {
@@ -481,12 +502,8 @@ class BackendDashboard {
     }
 
     exportData() {
-        // Open the appropriate API endpoint
-        if (this.API_BASE_URL.includes('localhost')) {
-            window.open(`${this.API_BASE_URL}/api/metrics`, '_blank');
-        } else {
-            window.open(`${this.API_BASE_URL}/metrics.json`, '_blank');
-        }
+        // Redirect to the API metrics endpoint
+        window.open(`${this.API_BASE_URL}/api/metrics`, '_blank');
         this.showSuccess('Opening metrics API endpoint! 📊');
     }
 

@@ -1,0 +1,124 @@
+name: GitHub Pages Static API
+
+on:
+  push:
+    branches: [ main, master ]
+  schedule:
+    # Update COVID data every hour
+    - cron: '0 * * * *'
+  workflow_dispatch: # Allow manual triggers
+
+jobs:
+  generate-github-api:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    
+    - name: Run tests
+      run: ./mvnw clean test
+    
+    - name: Build application
+      run: ./mvnw clean package -DskipTests
+    
+    - name: Generate Static COVID API
+      run: |
+        echo "📊 Generating static COVID-19 API for GitHub Pages..."
+        
+        # Create static API directory
+        mkdir -p static-api
+        
+        # Start Spring Boot app temporarily
+        echo "🚀 Starting application..."
+        timeout 60s java -jar target/india-covid19-dashboard-1.0.0.jar --server.port=8080 &
+        APP_PID=$!
+        
+        # Wait for startup
+        echo "⏳ Waiting for application to start..."
+        sleep 25
+        
+        # Test if app is responding
+        if curl -f http://localhost:8080/actuator/health --max-time 10; then
+          echo "✅ Application is healthy, generating API data..."
+          
+          # Fetch metrics data
+          curl -f http://localhost:8080/api/metrics --max-time 15 > static-api/metrics.json
+          
+          # Create a simple index page
+          cat > static-api/index.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<head>
+  <title>COVID-19 Dashboard API</title>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+    .api-link { background: #f0f0f0; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    .status { color: #28a745; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>🦠 COVID-19 Dashboard API</h1>
+  <p class="status">✅ Live and Updated Hourly via GitHub Actions</p>
+  
+  <h3>📊 API Endpoints:</h3>
+  <div class="api-link">
+    <strong>Metrics:</strong> <a href="metrics.json">metrics.json</a>
+  </div>
+  
+  <h3>📱 Usage:</h3>
+  <code>fetch('https://pythonicboat.github.io/covid-dashboard-india/metrics.json')</code>
+  
+  <h3>🔄 Updates:</h3>
+  <p>Data refreshes every hour automatically via GitHub Actions</p>
+  
+  <hr>
+  <p><small>Generated at: $(date)</small></p>
+</body>
+</html>
+EOF
+          
+          echo "✅ Static API generated successfully!"
+          ls -la static-api/
+          
+        else
+          echo "❌ Application failed to start, creating error response"
+          cat > static-api/metrics.json << 'EOF'
+{
+  "status": "error",
+  "message": "Backend temporarily unavailable, please try again later",
+  "timestamp": "$(date)"
+}
+EOF
+        fi
+        
+        # Cleanup
+        kill $APP_PID 2>/dev/null || true
+        pkill -f "java.*india-covid19-dashboard" || true
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./static-api
+        publish_branch: gh-pages
+    
+    - name: Summary
+      run: |
+        echo "🎉 GitHub Pages API deployment complete!"
+        echo "📍 API URL: https://pythonicboat.github.io/covid-dashboard-india/"
+        echo "📊 Metrics: https://pythonicboat.github.io/covid-dashboard-india/metrics.json"
+        echo "⏰ Next update: $(date -d '+1 hour' 2>/dev/null || date -v +1H 2>/dev/null || echo 'in 1 hour')"

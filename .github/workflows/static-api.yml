@@ -1,0 +1,113 @@
+name: Generate Static API for GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    # Update COVID data every hour
+    - cron: '0 * * * *'
+  workflow_dispatch: # Allow manual triggers
+
+jobs:
+  generate-static-api:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    
+    - name: Build application
+      run: ./mvnw clean package -DskipTests
+    
+    - name: Generate Static API Data
+      run: |
+        echo "📊 Generating static COVID-19 API data..."
+        
+        # Create static API directory
+        mkdir -p static-api
+        
+        # Start the Spring Boot app in background
+        java -jar target/india-covid19-dashboard-1.0.0.jar --server.port=8080 &
+        APP_PID=$!
+        
+        # Wait for app to start
+        echo "⏳ Waiting for application to start..."
+        sleep 30
+        
+        # Check if app is running
+        if curl -f http://localhost:8080/actuator/health; then
+          echo "✅ Application is healthy"
+          
+          # Generate API endpoints
+          echo "📡 Fetching metrics data..."
+          curl -f http://localhost:8080/api/metrics > static-api/metrics.json
+          
+          # Generate CORS-enabled version
+          echo "🌐 Generating CORS-enabled version..."
+          cat > static-api/metrics-cors.json << EOF
+        {
+          "callback": "callback",
+          "data": $(cat static-api/metrics.json)
+        }
+        EOF
+          
+          # Generate index file
+          cat > static-api/index.html << EOF
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>COVID-19 Dashboard Static API</title>
+          <meta charset="UTF-8">
+        </head>
+        <body>
+          <h1>🦠 COVID-19 Dashboard Static API</h1>
+          <p>Last updated: $(date)</p>
+          <ul>
+            <li><a href="metrics.json">📊 Metrics JSON</a></li>
+            <li><a href="metrics-cors.json">🌐 CORS Metrics JSON</a></li>
+          </ul>
+          <p>This API is auto-generated every hour via GitHub Actions.</p>
+        </body>
+        </html>
+        EOF
+          
+          # Create _config.yml for GitHub Pages
+          echo "theme: jekyll-theme-minimal" > static-api/_config.yml
+          
+          echo "✅ Static API files generated successfully"
+          ls -la static-api/
+          
+        else
+          echo "❌ Application failed to start"
+          echo '{"status":"error","message":"Application failed to start","timestamp":"'$(date)'"}' > static-api/metrics.json
+        fi
+        
+        # Clean up
+        kill $APP_PID 2>/dev/null || true
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./static-api
+        publish_branch: gh-pages
+        cname: covid-api.yourdomain.com  # Optional: your custom domain
+    
+    - name: Create Release Info
+      run: |
+        echo "🎉 Static API deployed successfully!"
+        echo "📍 Available at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+        echo "📊 Metrics endpoint: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/metrics.json"
+        echo "⏰ Next update: $(date -d '+1 hour')"
