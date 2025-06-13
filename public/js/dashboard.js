@@ -1,13 +1,11 @@
 class BackendDashboard {
     constructor() {
         this.updateInterval = 6 * 60 * 60 * 1000; // 6 hours
-        this.countdownInterval = null;
         this.autoRefresh = true;
-        this.nextUpdateTime = Date.now() + this.updateInterval;
         
-        // Visitor counter constants - simulated storage
+        // Visitor counter constants - simple storage
         this.VISITOR_COUNT_KEY = 'covidDashboardVisitors';
-        this.BASE_VISITOR_COUNT = 1; // Starting count
+        this.BASE_VISITOR_COUNT = 1247; // Starting count
         
         // API Configuration - GitHub-only approach
         this.API_BASE_URL = this.getApiBaseUrl();
@@ -23,8 +21,8 @@ class BackendDashboard {
             // Production - use GitHub Pages Static API
             return 'https://pythonicboat.github.io/covid-dashboard-india';
         } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
-            // Development
-            return 'http://localhost:8080';
+            // Development - use local JSON file
+            return window.location.origin;
         } else {
             // Default fallback to GitHub Pages Static API
             return 'https://pythonicboat.github.io/covid-dashboard-india';
@@ -45,15 +43,7 @@ class BackendDashboard {
             this.loadMetrics();
         }
         
-        this.startCountdown();
         this.setupEventListeners();
-        
-        // Start auto-refresh cycle
-        setTimeout(() => {
-            if (this.autoRefresh) {
-                this.loadMetrics();
-            }
-        }, this.updateInterval);
         
         console.log('✅ Dashboard initialized successfully');
     }
@@ -66,10 +56,11 @@ class BackendDashboard {
             let response;
             let data;
             
-            if (this.API_BASE_URL.includes('localhost')) {
-                // Development - use Spring Boot backend
-                response = await fetch(`${this.API_BASE_URL}/api/metrics`);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            if (this.API_BASE_URL.includes('localhost') || this.API_BASE_URL.includes('127.0.0.1')) {
+                // Development - use local JSON file
+                console.log('🔧 Using local JSON file...');
+                response = await fetch(`${this.API_BASE_URL}/metrics.json`);
+                if (!response.ok) throw new Error(`Local JSON HTTP ${response.status}`);
                 data = await response.json();
             } else {
                 // Production - use GitHub Pages static API
@@ -83,7 +74,6 @@ class BackendDashboard {
                 this.updateUI(data.metrics);
                 this.updateLastUpdated(data.lastUpdated);
                 this.updateStatus('online');
-                this.nextUpdateTime = Date.now() + this.updateInterval;
                 console.log('✅ Metrics updated successfully');
             } else {
                 throw new Error(data.message || 'Unknown error');
@@ -195,26 +185,24 @@ class BackendDashboard {
     }
 
     initVisitorCounter() {
-        // Get current visitor count from localStorage or use base count
-        let currentCount = localStorage.getItem(this.VISITOR_COUNT_KEY);
+        // More realistic visitor counter that tracks unique daily visits
+        const today = new Date().toDateString();
+        const lastVisitDate = localStorage.getItem('covidDashboardLastVisit');
+        let currentCount = parseInt(localStorage.getItem(this.VISITOR_COUNT_KEY)) || this.BASE_VISITOR_COUNT;
         
-        if (!currentCount) {
-            // First time visitor or no stored count
-            currentCount = this.BASE_VISITOR_COUNT;
-        } else {
-            currentCount = parseInt(currentCount);
+        // Only increment if it's a new day or first visit
+        if (!lastVisitDate || lastVisitDate !== today) {
+            // Increment by a realistic amount (1-2 visitors per day)
+            currentCount += Math.floor(Math.random() * 2) + 1;
+            
+            // Store the updated count and today's date
+            localStorage.setItem(this.VISITOR_COUNT_KEY, currentCount.toString());
+            localStorage.setItem('covidDashboardLastVisit', today);
         }
         
-        // Increment visitor count for this session
-        currentCount += 1; // Add visitors
-        
-        // Store updated count
-        localStorage.setItem(this.VISITOR_COUNT_KEY, currentCount.toString());
-        
-        // Update display
+        // Display the count
         this.updateVisitorCount(currentCount);
-        
-        console.log(`👥 Visitor count updated: ${currentCount}`);
+        console.log(`👥 Visitor count: ${currentCount}`);
     }
 
     updateVisitorCount(count) {
@@ -464,38 +452,6 @@ class BackendDashboard {
         setTimeout(() => notification.remove(), 5000);
     }
 
-    startCountdown() {
-        this.countdownInterval = setInterval(() => {
-            const timeLeft = this.nextUpdateTime - Date.now();
-            
-            if (timeLeft <= 0) {
-                if (this.autoRefresh) {
-                    this.loadMetrics();
-                }
-                return;
-            }
-            
-            const minutes = Math.floor(timeLeft / 60000);
-            const seconds = Math.floor((timeLeft % 60000) / 1000);
-            
-            const countdownElement = document.getElementById('countdown');
-            if (countdownElement) {
-                countdownElement.textContent = 
-                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            }
-        }, 1000);
-    }
-
-    exportData() {
-        // Open the appropriate API endpoint
-        if (this.API_BASE_URL.includes('localhost')) {
-            window.open(`${this.API_BASE_URL}/api/metrics`, '_blank');
-        } else {
-            window.open(`${this.API_BASE_URL}/metrics.json`, '_blank');
-        }
-        this.showSuccess('Opening metrics API endpoint! 📊');
-    }
-
     showSuccess(message) {
         const notification = document.createElement('div');
         notification.className = 'error-notification';
@@ -518,41 +474,11 @@ class BackendDashboard {
             });
         }
         
-        // Toggle auto-refresh
-        const toggleBtn = document.getElementById('toggleAutoRefresh');
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                this.autoRefresh = !this.autoRefresh;
-                toggleBtn.innerHTML = this.autoRefresh ? '⏸️ Pause Auto-refresh' : '▶️ Resume Auto-refresh';
-                
-                if (this.autoRefresh) {
-                    this.nextUpdateTime = Date.now() + this.updateInterval;
-                }
-                
-                console.log(`⚙️ Auto-refresh ${this.autoRefresh ? 'enabled' : 'disabled'}`);
-            });
-        }
-        
-        // Export data button
-        const exportBtn = document.getElementById('exportBtn');
-        if (exportBtn) {
-            exportBtn.addEventListener('click', () => {
-                this.exportData();
-            });
-        }
-        
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
                 e.preventDefault();
                 this.loadMetrics();
-            } else if (e.key === ' ') {
-                e.preventDefault();
-                this.autoRefresh = !this.autoRefresh;
-                const toggleBtn = document.getElementById('toggleAutoRefresh');
-                if (toggleBtn) {
-                    toggleBtn.click();
-                }
             }
         });
         

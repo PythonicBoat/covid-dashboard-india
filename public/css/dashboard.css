@@ -38,7 +38,7 @@ header {
     flex-wrap: wrap;
 }
 
-.last-updated, .auto-refresh, .visitor-counter {
+.last-updated, .visitor-counter {
     font-size: 1.1em;
     opacity: 0.9;
     background: rgba(255,255,255,0.1);
@@ -693,7 +693,7 @@ footer p {
         gap: 15px;
     }
     
-    .last-updated, .auto-refresh, .visitor-counter {
+    .last-updated, .visitor-counter {
         font-size: 1em;
         padding: 6px 12px;
     }

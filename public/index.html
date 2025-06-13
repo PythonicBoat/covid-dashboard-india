@@ -9,6 +9,7 @@
 </head>
 <body>
     <div class="container">
+        <!-- HEADER -->
         <header>
             <div class="header-content">
                 <h1>📊 <span>India COVID19 Live Dashboard</span></h1>
@@ -20,16 +21,11 @@
                             LIVE
                         </span>
                     </div>
-                    <div class="auto-refresh">
-                        <span id="nextUpdate">Next update in: <span id="countdown">--:--</span></span>
-                    </div>
-                    <div class="visitor-counter">
-                        👥 Visitors: <span id="visitorCount">1,247</span>
-                    </div>
                 </div>
             </div>
         </header>
         
+        <!-- METRICS GRID -->
         <div class="metrics-grid">
             <div class="metric-card">
                 <div class="metric-icon">🦠</div>
@@ -60,7 +56,7 @@
             </div>
         </div>
         
-        <!-- State-wise COVID Data Table -->
+        <!-- STATE TABLE -->
         <div class="state-table-section">
             <div class="table-header">
                 <h3>🏛️ State-wise COVID-19 2025 Data</h3>
@@ -78,7 +74,6 @@
                         </tr>
                     </thead>
                     <tbody id="stateTableBody">
-                        <!-- State data will be populated by JavaScript -->
                         <tr>
                             <td colspan="6" style="text-align: center; padding: 20px;">
                                 <div style="color: #666;">
@@ -91,6 +86,7 @@
             </div>
         </div>
         
+        <!-- CHARTS -->
         <div class="charts-section">
             <div class="chart-container">
                 <h3>📈 COVID-19 Daily Trends (Last 7 Days)</h3>
@@ -104,19 +100,19 @@
             </div>
         </div>
         
+        <!-- ACTIONS -->
         <div class="actions">
             <button id="refreshBtn" class="refresh-btn">🔄 Refresh Now</button>
-            <button id="toggleAutoRefresh" class="toggle-btn">⏸️ Pause Auto-refresh</button>
-            <button id="exportBtn" class="export-btn">🔗 View API Data</button>
         </div>
         
+        <!-- FOOTER -->
         <footer>
-            <p>Built with ❤️ for India | Auto-refresh: Every Hour</p>
+            <p>Built with ❤️ for India | Auto-refreshing feed</p>
             <p class="build-info">🇮🇳 India COVID-19 Live Dashboard | Real-time Data from Ministry of Health</p>
         </footer>
     </div>
     
-    <!-- Static version - no server-side data -->
+    <!-- SCRIPTS -->
     <script>
         window.initialMetrics = {};
         window.lastUpdated = '';

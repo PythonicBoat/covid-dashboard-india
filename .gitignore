@@ -31,3 +31,27 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Debug and temporary files
+debug*.html
+test*.html
+*-fixed.html
+*-backup.html
+
+# System files
+.DS_Store
+Thumbs.db
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*~
+*.orig
+
+# Node modules (if any)
+node_modules/
+
+# Local environment files
+.env
+.env.local
