@@ -18,85 +18,6 @@ A real-time COVID-19 dashboard for India with state-wise statistics, live update
 - 📈 **Coming soon** features section
 - 🔗 **API endpoint** for raw data access
 
-## 🏗️ Architecture
-
-### Backend (Spring Boot)
-- **Java 17** with Spring Boot 3.1.0
-- RESTful API endpoints
-- Real-time data fetching from official sources
-- State filtering (displays states 1-31 only)
-- CORS configured for cross-origin requests
-
-### Frontend (Vanilla JavaScript)
-- Clean, modern UI with CSS animations
-- Environment-aware API calls
-- localStorage for visitor tracking
-- Responsive design with mobile support
-
-## 🚀 Deployment
-
-### GitHub Actions Deployment
-
-1. **Push to GitHub:**
-   ```bash
-   git add .
-   git commit -m "Initial commit: COVID-19 Dashboard"
-   git branch -M main
-   git remote add origin https://github.com/yourusername/covid-dashboard.git
-   git push -u origin main
-   ```
-
-2. **GitHub Actions:**
-   - Automatically builds and tests on every push
-   - Generates static API data for GitHub Pages
-   - Runs hourly to keep COVID data updated
-   - Located in `.github/workflows/` directory
-
-3. **GitHub Pages:**
-   - Static API data is automatically deployed to GitHub Pages
-   - Frontend can be deployed via GitHub Pages or Vercel
-
-### Frontend Deployment (Vercel/GitHub Pages)
-
-1. **GitHub Pages (Recommended):**
-   - Enable GitHub Pages in repository settings
-   - Set source to deploy from `main` branch `/public` folder
-   - Static API fallback is automatically generated
-
-2. **Vercel (Alternative):**
-   - Import your GitHub repo in [Vercel](https://vercel.com)
-   - Set build output directory to `public/`
-
-## 🛠️ Local Development
-
-### Prerequisites
-- Java 17 or higher
-- Maven 3.6+
-- Modern web browser
-
-### Running Locally
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yourusername/covid-dashboard.git
-   cd covid-dashboard
-   ```
-
-2. **Start the backend:**
-   ```bash
-   ./mvnw spring-boot:run
-   ```
-
-3. **Access the dashboard:**
-   - Open http://localhost:8080 in your browser
-   - The dashboard will load with real-time COVID-19 data
-
-### API Endpoints
-
-- `GET /` - Main dashboard page
-- `GET /api/metrics` - JSON API with COVID-19 metrics
-- `GET /actuator/health` - Health check endpoint
-
 ## 🎨 Features in Detail
 
 ### Metric Cards
@@ -120,27 +41,8 @@ A real-time COVID-19 dashboard for India with state-wise statistics, live update
 ### Coming Soon
 - **7-day trend charts** with professional placeholder
 - **Advanced analytics** features
-- **More visualization options**
-
-## 🔧 Configuration
-
-### Environment Variables
-```properties
-# Production
-SPRING_PROFILES_ACTIVE=prod
-PORT=8080
-CORS_ALLOWED_ORIGINS=https://your-frontend-domain.vercel.app
-
-# Development
-SPRING_PROFILES_ACTIVE=default
-```
-
-### CORS Configuration
-The application is configured to accept requests from:
-- Vercel deployments (*.vercel.app)
-- Netlify deployments (*.netlify.app)
-- Local development (localhost:*)
-
+- **Emergency response** with sources
+  
 ## 📱 Mobile Support
 
 - **Responsive design** adapts to all screen sizes
@@ -171,8 +73,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you encounter any issues or have questions:
 - Open an issue on GitHub
-- Check the [GitHub Actions logs](https://github.com/yourusername/covid-dashboard/actions) for deployment status
-- Verify the [static API endpoint](https://yourusername.github.io/covid-dashboard/metrics.json)
+- Check the [GitHub Actions logs](https://github.com/yourusername/covid-dashboard-india/actions) for deployment status
+- Verify the [static API endpoint](https://pythonicboat.github.io/covid-dashboard-india/metrics.json)
 
 ---
 
