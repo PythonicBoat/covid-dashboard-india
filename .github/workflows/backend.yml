@@ -35,34 +35,7 @@ jobs:
     - name: Build application
       run: ./mvnw clean compile package -DskipTests
     
-    # Option 1: Deploy to Railway automatically
-    - name: Deploy to Railway
-      if: github.ref == 'refs/heads/main'
-      uses: railwayapp/railway-deploy@v1.0.0
-      with:
-        railway_token: ${{ secrets.RAILWAY_TOKEN }}
-        service: covid-dashboard-backend
-    
-    # Option 2: Deploy to Render
-    - name: Deploy to Render
-      if: github.ref == 'refs/heads/main'
-      uses: bounceapp/render-action@0.6.0
-      with:
-        render-token: ${{ secrets.RENDER_TOKEN }}
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        service-id: ${{ secrets.RENDER_SERVICE_ID }}
-        retries: 20
-        wait: 16000
-        sleep: 10000
-    
-    # Option 3: Deploy to Heroku
-    - name: Deploy to Heroku
-      if: github.ref == 'refs/heads/main'
-      uses: akhileshns/heroku-deploy@v3.12.14
-      with:
-        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-        heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-        heroku_email: ${{ secrets.HEROKU_EMAIL }}
+    # GitHub Actions handles CI/CD - no external deployment needed
     
     # Generate static API data for GitHub Pages fallback
     - name: Generate Static API Data

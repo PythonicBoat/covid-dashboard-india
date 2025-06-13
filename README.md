@@ -35,7 +35,7 @@ A real-time COVID-19 dashboard for India with state-wise statistics, live update
 
 ## 🚀 Deployment
 
-### Backend Deployment (GitHub Actions + Railway/Heroku)
+### GitHub Actions Deployment
 
 1. **Push to GitHub:**
    ```bash
@@ -46,28 +46,26 @@ A real-time COVID-19 dashboard for India with state-wise statistics, live update
    git push -u origin main
    ```
 
-2. **Railway Deployment:**
-   - Connect your GitHub repo to [Railway](https://railway.app)
-   - Railway will auto-detect the Spring Boot app
-   - Set environment variable: `SPRING_PROFILES_ACTIVE=prod`
-
-3. **GitHub Actions:**
+2. **GitHub Actions:**
    - Automatically builds and tests on every push
-   - Runs hourly to keep the backend active
-   - Located in `.github/workflows/backend.yml`
+   - Generates static API data for GitHub Pages
+   - Runs hourly to keep COVID data updated
+   - Located in `.github/workflows/` directory
 
-### Frontend Deployment (Vercel)
+3. **GitHub Pages:**
+   - Static API data is automatically deployed to GitHub Pages
+   - Frontend can be deployed via GitHub Pages or Vercel
 
-1. **Connect to Vercel:**
+### Frontend Deployment (Vercel/GitHub Pages)
+
+1. **GitHub Pages (Recommended):**
+   - Enable GitHub Pages in repository settings
+   - Set source to deploy from `main` branch `/public` folder
+   - Static API fallback is automatically generated
+
+2. **Vercel (Alternative):**
    - Import your GitHub repo in [Vercel](https://vercel.com)
-   - Vercel will detect the static files automatically
-
-2. **Update Backend URL:**
-   - After backend deployment, update the API URL in `dashboard.js`
-   - Replace `your-backend-url.railway.app` with your actual backend URL
-
-3. **Environment Variables:**
-   - Set `BACKEND_URL` in Vercel dashboard if needed
+   - Set build output directory to `public/`
 
 ## 🛠️ Local Development
 
@@ -98,13 +96,6 @@ A real-time COVID-19 dashboard for India with state-wise statistics, live update
 - `GET /` - Main dashboard page
 - `GET /api/metrics` - JSON API with COVID-19 metrics
 - `GET /actuator/health` - Health check endpoint
-
-## 📊 Data Sources
-
-- **Primary Source:** Ministry of Health and Family Welfare, India
-- **API Endpoint:** https://covid19dashboard.mohfw.gov.in/data/datanew.json
-- **Update Frequency:** Hourly (via GitHub Actions)
-- **Data Coverage:** All 31 Indian states and union territories
 
 ## 🎨 Features in Detail
 
@@ -173,15 +164,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Ministry of Health and Family Welfare, India** for providing the COVID-19 data
 - **Spring Boot** community for the excellent framework
-- **GitHub Actions** for CI/CD automation
-- **Railway/Vercel** for hosting infrastructure
+- **GitHub Actions** for CI/CD automation and static API generation
+- **GitHub Pages** for hosting infrastructure
 
 ## 📞 Support
 
 If you encounter any issues or have questions:
 - Open an issue on GitHub
 - Check the [GitHub Actions logs](https://github.com/yourusername/covid-dashboard/actions) for deployment status
-- Verify the [backend health endpoint](https://your-backend-url.railway.app/actuator/health)
+- Verify the [static API endpoint](https://yourusername.github.io/covid-dashboard/metrics.json)
 
 ---
 

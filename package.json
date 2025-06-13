@@ -5,7 +5,7 @@
   "main": "public/index.html",
   "scripts": {
     "build": "echo 'Static files ready for deployment'",
-    "start": "echo 'Frontend deployed on Vercel'",
+    "start": "echo 'Frontend can be deployed on GitHub Pages or Vercel'",
     "dev": "python3 -m http.server 3000 --directory public || python -m http.server 3000 --directory public"
   },
   "keywords": [

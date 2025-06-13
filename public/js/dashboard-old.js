@@ -32,17 +32,11 @@ class BackendDashboard {
     }
 
     getProductionApiUrl() {
-        // Multiple backend options in order of preference
-        const backendOptions = [
-            'https://covid-dashboard-india-production.railway.app',  // Railway
-            'https://covid-dashboard-pythonicboat.onrender.com',     // Render
-            'https://pythonicboat.github.io/covid-dashboard-india', // GitHub Pages Static API
-            'https://covid-dashboard-backend.herokuapp.com'         // Heroku (if configured)
-        ];
+        // Use GitHub Pages Static API as the primary backend
+        const githubPagesApi = 'https://pythonicboat.github.io/covid-dashboard-india';
         
-        // For now, return the first option
-        // You can implement fallback logic here if needed
-        return backendOptions[0];
+        // For now, return the GitHub Pages API
+        return githubPagesApi;
     }
 
     init() {
