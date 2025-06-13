@@ -1,0 +1,29 @@
+{
+  "name": "covid-dashboard-frontend",
+  "version": "1.0.0",
+  "description": "COVID-19 India Dashboard Frontend",
+  "main": "public/index.html",
+  "scripts": {
+    "build": "echo 'Static files ready for deployment'",
+    "start": "echo 'Frontend deployed on Vercel'",
+    "dev": "python3 -m http.server 3000 --directory public || python -m http.server 3000 --directory public"
+  },
+  "keywords": [
+    "covid-19",
+    "dashboard",
+    "india",
+    "statistics",
+    "health",
+    "real-time"
+  ],
+  "author": "COVID Dashboard Team",
+  "license": "MIT",
+  "homepage": "https://github.com/yourusername/covid-dashboard-india#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/covid-dashboard-india.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/covid-dashboard-india/issues"
+  }
+}
