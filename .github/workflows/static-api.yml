@@ -12,6 +12,11 @@ jobs:
   generate-static-api:
     runs-on: ubuntu-latest
     
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
     steps:
     - uses: actions/checkout@v4
     
@@ -102,8 +107,8 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./static-api
-        publish_branch: gh-pages
-        cname: covid-api.yourdomain.com  # Optional: your custom domain
+        publish_branch: gh-pages-api
+        force_orphan: true
     
     - name: Create Release Info
       run: |

@@ -1,0 +1,87 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    # Update COVID data every hour
+    - cron: '0 * * * *'
+  workflow_dispatch: # Allow manual triggers
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    
+    - name: Build application
+      run: ./mvnw clean package -DskipTests
+    
+    - name: Generate Static API Data
+      run: |
+        echo "📊 Generating static COVID-19 API data..."
+        
+        # Create pages directory
+        mkdir -p _site
+        
+        # Copy public files
+        cp -r public/* _site/
+        
+        # Start the Spring Boot app in background
+        java -jar target/india-covid19-dashboard-1.0.0.jar --server.port=8080 &
+        APP_PID=$!
+        
+        # Wait for app to start
+        echo "⏳ Waiting for application to start..."
+        sleep 30
+        
+        # Check if app is running and generate API
+        if curl -f http://localhost:8080/actuator/health; then
+          echo "✅ Application is healthy"
+          
+          # Generate API endpoints
+          echo "📡 Fetching metrics data..."
+          curl -f http://localhost:8080/api/metrics > _site/metrics.json
+          
+          echo "✅ Static API files generated successfully"
+          ls -la _site/
+          
+        else
+          echo "❌ Application failed to start"
+          echo '{"status":"error","message":"Application failed to start","timestamp":"'$(date)'"}' > _site/metrics.json
+        fi
+        
+        # Clean up
+        kill $APP_PID 2>/dev/null || true
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
+    
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: _site
+    
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
