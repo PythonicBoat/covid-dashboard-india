@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">India COVID 19 Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>📊 <span th:text="${currentUser}">India COVID19 Live Dashboard</span></h1>
+                <div class="header-info">
+                    <div class="last-updated">
+                        Last Updated: <span id="lastUpdated" th:text="${lastUpdated}">Loading...</span>
+                        <span class="live-indicator">
+                            <span class="live-dot"></span>
+                            LIVE
+                        </span>
+                    </div>
+                    <div class="auto-refresh">
+                        <span id="nextUpdate">Next update in: <span id="countdown">--:--</span></span>
+                    </div>
+                    <div class="visitor-counter">
+                        👥 Visitors: <span id="visitorCount">1,247</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">🦠</div>
+                <h3>New Cases</h3>
+                <div class="metric-value" id="totalCasesChange" th:text="${metrics.totalCasesChange ?: '0'}">-</div>
+                <div class="metric-change covid-increase" id="totalCases" th:text="${#numbers.formatInteger(metrics.totalCases ?: 0, 0, 'COMMA')}">Total Cases</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-icon">⚠️</div>
+                <h3>New Active</h3>
+                <div class="metric-value" id="activeCasesChange" th:text="${metrics.activeCasesChange ?: '0'}">-</div>
+                <div class="metric-change covid-increase" id="activeCases" th:text="${#numbers.formatInteger(metrics.activeCases ?: 0, 0, 'COMMA')}">Active Cases</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-icon">💚</div>
+                <h3>New Recovered</h3>
+                <div class="metric-value" id="recoveredCasesChange" th:text="${metrics.recoveredCasesChange ?: '0'}">-</div>
+                <div class="metric-change covid-decrease" id="recoveredCases" th:text="${#numbers.formatInteger(metrics.recoveredCases ?: 0, 0, 'COMMA')}">Total Recovered</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-icon">💔</div>
+                <h3>New Deaths</h3>
+                <div class="metric-value" id="deathsChange" th:text="${metrics.deathsChange ?: '0'}">-</div>
+                <div class="metric-change covid-increase" id="deaths" th:text="${#numbers.formatInteger(metrics.deaths ?: 0, 0, 'COMMA')}">Total Deaths</div>
+            </div>
+        </div>
+        
+        <!-- State-wise COVID Data Table -->
+        <div class="state-table-section">
+            <div class="table-header">
+                <h3>🏛️ State-wise COVID-19 2025 Data</h3>
+            </div>
+            <div class="table-wrapper">
+                <table class="state-table" id="stateTable">
+                    <thead>
+                        <tr>
+                            <th>S.No.</th>
+                            <th>State/UT</th>
+                            <th>Active Cases</th>
+                            <th>Total Cases</th>
+                            <th>Recovered</th>
+                            <th>Deaths</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stateTableBody">
+                        <!-- State data will be populated by JavaScript -->
+                        <tr th:each="state : ${metrics.stateData ?: {}}">
+                            <td th:text="${state.sno}">-</td>
+                            <td th:text="${state.state_name}">-</td>
+                            <td th:text="${#numbers.formatInteger(T(java.lang.Integer).parseInt(state.active ?: '0'), 0, 'COMMA')}">-</td>
+                            <td th:text="${#numbers.formatInteger(T(java.lang.Integer).parseInt(state.positive ?: '0'), 0, 'COMMA')}">-</td>
+                            <td th:text="${#numbers.formatInteger(T(java.lang.Integer).parseInt(state.cured ?: '0'), 0, 'COMMA')}">-</td>
+                            <td th:text="${#numbers.formatInteger(T(java.lang.Integer).parseInt(state.death ?: '0'), 0, 'COMMA')}">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="charts-section">
+            <div class="chart-container">
+                <h3>📈 COVID-19 Daily Trends (Last 7 Days)</h3>
+                <div class="coming-soon-wrapper">
+                    <div class="coming-soon-label">
+                        <div class="coming-soon-icon">🚧</div>
+                        <h4>Coming Soon</h4>
+                        <p>7-day trend analytics are being developed and will be available soon!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button id="refreshBtn" class="refresh-btn">🔄 Refresh Now</button>
+            <button id="toggleAutoRefresh" class="toggle-btn">⏸️ Pause Auto-refresh</button>
+            <button id="exportBtn" class="export-btn">🔗 View API Data</button>
+        </div>
+        
+        <footer>
+            <p>Built with ❤️ for India | Auto-refresh: Every Hour</p>
+            <p class="build-info">🇮🇳 India COVID-19 Live Dashboard | Real-time Data from Ministry of Health</p>
+        </footer>
+    </div>
+    
+    <!-- Pass server data to JavaScript -->
+    <script th:inline="javascript">
+        window.initialMetrics = /*[[${metrics}]]*/ {};
+        window.lastUpdated = /*[[${lastUpdated}]]*/ '';
+        window.currentUser = /*[[${currentUser}]]*/ 'India COVID19 Live Dashboard';
+    </script>
+    <script th:src="@{/js/dashboard.js}"></script>
+</body>
+</html>
