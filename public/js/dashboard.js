@@ -37,6 +37,9 @@ class BackendDashboard {
         // Initialize with server-side data if available
         if (window.initialMetrics) {
             this.updateUI(window.initialMetrics);
+        } else {
+            // Load metrics immediately on startup if no server-side data
+            this.loadMetrics();
         }
         
         this.startCountdown();
