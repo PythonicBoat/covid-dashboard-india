@@ -35,25 +35,55 @@ jobs:
     - name: Build application
       run: ./mvnw clean compile package -DskipTests
     
-    - name: Build Docker image
-      run: |
-        docker build -t covid-dashboard-backend .
+    # Option 1: Deploy to Railway automatically
+    - name: Deploy to Railway
+      if: github.ref == 'refs/heads/main'
+      uses: railwayapp/railway-deploy@v1.0.0
+      with:
+        railway_token: ${{ secrets.RAILWAY_TOKEN }}
+        service: covid-dashboard-backend
     
-    - name: Deploy to Railway (or alternative)
-      run: |
-        echo "🚀 Backend built successfully!"
-        echo "📊 COVID-19 Dashboard Backend ready for deployment"
-        
-    # Optional: Deploy to a free tier service
-    # You can uncomment and configure for your preferred deployment service
-    # - name: Deploy to Heroku
-    #   uses: akhileshns/heroku-deploy@v3.12.12
-    #   with:
-    #     heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-    #     heroku_app_name: "your-app-name"
-    #     heroku_email: "your-email@example.com"
+    # Option 2: Deploy to Render
+    - name: Deploy to Render
+      if: github.ref == 'refs/heads/main'
+      uses: bounceapp/render-action@0.6.0
+      with:
+        render-token: ${{ secrets.RENDER_TOKEN }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        service-id: ${{ secrets.RENDER_SERVICE_ID }}
+        retries: 20
+        wait: 16000
+        sleep: 10000
     
-    - name: Keep backend alive
+    # Option 3: Deploy to Heroku
+    - name: Deploy to Heroku
+      if: github.ref == 'refs/heads/main'
+      uses: akhileshns/heroku-deploy@v3.12.14
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+        heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+        heroku_email: ${{ secrets.HEROKU_EMAIL }}
+    
+    # Generate static API data for GitHub Pages fallback
+    - name: Generate Static API Data
+      run: |
+        mkdir -p static-api
+        # Run the app briefly to generate data
+        timeout 30s java -jar target/india-covid19-dashboard-1.0.0.jar --server.port=8080 &
+        sleep 20
+        curl -f http://localhost:8080/api/metrics > static-api/metrics.json || echo '{"status":"error","message":"API generation failed"}' > static-api/metrics.json
+        ls -la static-api/
+    
+    - name: Deploy to GitHub Pages (Static API)
+      if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./static-api
+        publish_branch: gh-pages-api
+    
+    - name: Keep services alive
       run: |
         echo "⏰ Scheduled run completed at $(date)"
         echo "🔄 This job keeps the backend active and updates COVID data hourly"
+        echo "📊 Static API also updated on GitHub Pages"

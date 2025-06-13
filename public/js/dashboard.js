@@ -20,8 +20,8 @@ class BackendDashboard {
         const hostname = window.location.hostname;
         
         if (hostname.includes('vercel.app') || hostname.includes('netlify.app')) {
-            // Production - use your deployed backend URL
-            return 'https://your-backend-url.railway.app';
+            // Production - try multiple backend options
+            return this.getProductionApiUrl();
         } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
             // Development
             return 'http://localhost:8080';
@@ -29,6 +29,20 @@ class BackendDashboard {
             // Default fallback
             return window.location.origin;
         }
+    }
+
+    getProductionApiUrl() {
+        // Multiple backend options in order of preference
+        const backendOptions = [
+            'https://covid-dashboard-india-production.railway.app',  // Railway
+            'https://covid-dashboard-pythonicboat.onrender.com',     // Render
+            'https://pythonicboat.github.io/covid-dashboard-india', // GitHub Pages Static API
+            'https://covid-dashboard-backend.herokuapp.com'         // Heroku (if configured)
+        ];
+        
+        // For now, return the first option
+        // You can implement fallback logic here if needed
+        return backendOptions[0];
     }
 
     init() {
@@ -60,13 +74,25 @@ class BackendDashboard {
             console.log('📊 Loading fresh metrics...');
             this.showLoading(true);
             
-            const response = await fetch(`${this.API_BASE_URL}/api/metrics`);
+            let response;
+            let data;
             
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            // Try primary backend first
+            try {
+                response = await fetch(`${this.API_BASE_URL}/api/metrics`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                data = await response.json();
+            } catch (primaryError) {
+                console.warn('⚠️ Primary backend failed, trying GitHub Pages static API...');
+                
+                // Fallback to GitHub Pages static API
+                const staticApiUrl = 'https://pythonicboat.github.io/covid-dashboard-india/metrics.json';
+                response = await fetch(staticApiUrl);
+                if (!response.ok) throw new Error(`Static API HTTP ${response.status}`);
+                data = await response.json();
+                
+                console.log('✅ Using static API fallback');
             }
-            
-            const data = await response.json();
             
             if (data.status === 'success') {
                 this.updateUI(data.metrics);
