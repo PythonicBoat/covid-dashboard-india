@@ -16,14 +16,17 @@ class BackendDashboard {
     }
 
     getApiBaseUrl() {
-        // Check if we're in development or production
+        // Check if we're in production or development
         const hostname = window.location.hostname;
         
-        if (hostname === 'localhost' || hostname === '127.0.0.1') {
-            // Development - use local Spring Boot backend
+        if (hostname.includes('vercel.app') || hostname.includes('netlify.app') || hostname.includes('github.io')) {
+            // Production - use GitHub Pages Static API
+            return 'https://pythonicboat.github.io/covid-dashboard-india';
+        } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            // Development
             return 'http://localhost:8080';
         } else {
-            // Production - use GitHub Pages static API only
+            // Default fallback to GitHub Pages Static API
             return 'https://pythonicboat.github.io/covid-dashboard-india';
         }
     }
