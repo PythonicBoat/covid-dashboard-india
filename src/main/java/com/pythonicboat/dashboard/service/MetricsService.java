@@ -23,8 +23,8 @@ public class MetricsService {
     private LocalDateTime lastUpdated = LocalDateTime.now();
     private Map<String, Object> previousMetrics = new HashMap<>();
 
-    // Fetch data every hour (3600000 ms)
-    @Scheduled(fixedRate = 3600000)
+    // Fetch data every 6 hours (21600000 ms)
+    @Scheduled(fixedRate = 21600000)
     public void updateMetrics() {
         try {
             System.out.println("🔄 Updating metrics at: " + LocalDateTime.now());

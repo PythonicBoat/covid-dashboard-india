@@ -5,7 +5,7 @@ on:
     branches: [ main ]
   schedule:
     # Update COVID data every hour
-    - cron: '0 * * * *'
+    - cron: '0 */6 * * *'
   workflow_dispatch: # Allow manual triggers
 
 permissions:

@@ -1,6 +1,6 @@
 class BackendDashboard {
     constructor() {
-        this.updateInterval = 60 * 60 * 1000; // 1 hour
+        this.updateInterval = 6 * 60 * 60 * 1000; // 6 hours
         this.countdownInterval = null;
         this.autoRefresh = true;
         this.nextUpdateTime = Date.now() + this.updateInterval;

@@ -4,8 +4,8 @@ on:
   push:
     branches: [ main ]
   schedule:
-    # Update COVID data every hour
-    - cron: '0 * * * *'
+    # Update COVID data every 6 hours
+    - cron: '0 */6 * * *'
   workflow_dispatch: # Allow manual triggers
 
 jobs:
