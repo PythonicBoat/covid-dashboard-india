@@ -8,7 +8,6 @@ class BackendDashboard {
         // Visitor counter constants - simulated storage
         this.VISITOR_COUNT_KEY = 'covidDashboardVisitors';
         this.BASE_VISITOR_COUNT = 1; // Starting count
-        
         // API Configuration - auto-detect environment
         this.API_BASE_URL = this.getApiBaseUrl();
         
@@ -63,13 +62,23 @@ class BackendDashboard {
             console.log('📊 Loading fresh metrics...');
             this.showLoading(true);
             
-            const response = await fetch(`${this.API_BASE_URL}/api/metrics`);
+            let response;
+            let data;
             
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            if (this.API_BASE_URL.includes('localhost')) {
+                // Development - use Spring Boot backend
+                response = await fetch(`${this.API_BASE_URL}/api/metrics`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                data = await response.json();
+            } else {
+                // Production - use GitHub Pages static API
+                console.log('🌐 Using GitHub Pages static API...');
+                response = await fetch(`${this.API_BASE_URL}/metrics.json`);
+                if (!response.ok) throw new Error(`GitHub API HTTP ${response.status}`);
+                data = await response.json();
             }
             
-            const data = await response.json();
+            // The rest of the data handling is the same
             
             if (data.status === 'success') {
                 this.updateUI(data.metrics);
