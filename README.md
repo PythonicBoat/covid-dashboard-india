@@ -11,10 +11,8 @@ A real-time COVID-19 dashboard for India with state-wise statistics, live update
 
 - 📊 **Real-time COVID-19 metrics** with live indicators
 - 🏛️ **State-wise data table** for all 31 Indian states
-- 👥 **Visitor counter** with persistent tracking
 - 🔄 **Auto-refresh** functionality (hourly updates)
 - 📱 **Responsive design** for all devices
-- 🚀 **Professional animations** and UI elements
 - 📈 **Coming soon** features section
 - 🔗 **API endpoint** for raw data access
 
@@ -103,7 +101,6 @@ A real-time COVID-19 dashboard for India with state-wise statistics, live update
 - **New Cases** as primary display (swapped from totals)
 - **Active, Recovered, Deaths** with trend indicators
 - **Color-coded arrows** (red for increases, green for recoveries)
-- **No +/- signs** for cleaner display
 
 ### State Table
 - **Filtered data** showing only states 1-31
@@ -120,7 +117,7 @@ A real-time COVID-19 dashboard for India with state-wise statistics, live update
 ### Coming Soon
 - **7-day trend charts** with professional placeholder
 - **Advanced analytics** features
-- **More visualization options**
+- **More emergency response actions**
 
 ## 🔧 Configuration
 
