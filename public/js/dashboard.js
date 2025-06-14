@@ -57,10 +57,10 @@ class BackendDashboard {
             let data;
             
             if (this.API_BASE_URL.includes('localhost') || this.API_BASE_URL.includes('127.0.0.1')) {
-                // Development - use local JSON file
-                console.log('🔧 Using local JSON file...');
-                response = await fetch(`${this.API_BASE_URL}/metrics.json`);
-                if (!response.ok) throw new Error(`Local JSON HTTP ${response.status}`);
+                // Development - use Spring Boot API endpoint
+                console.log('🔧 Using local Spring Boot API...');
+                response = await fetch(`${this.API_BASE_URL}/api/metrics`);
+                if (!response.ok) throw new Error(`Local API HTTP ${response.status}`);
                 data = await response.json();
             } else {
                 // Production - use GitHub Pages static API
