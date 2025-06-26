@@ -6,8 +6,7 @@ on:
   pull_request:
     branches: [ main, master ]
   schedule:
-    # Run every 6 hours to keep the API active and update COVID data
-    - cron: '0 */6 * * *'
+    - cron: '0 */12 * * *'
 
 jobs:
   build-and-deploy:
